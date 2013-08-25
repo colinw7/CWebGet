@@ -1,5 +1,4 @@
-CPP_CC = g++
-C_CC   = gcc
+CC = g++
 
 RM = rm
 
@@ -17,7 +16,7 @@ clean:
 	$(RM) -f $(OBJ_DIR)/*.o
 	$(RM) -f $(BIN_DIR)/CWebGet
 
-CPP_SRC = \
+SRC = \
 CWebGetMain.cpp \
 CWebGet.cpp \
 CUrl.cpp \
@@ -32,22 +31,16 @@ CHtmlToken.cpp \
 CHtmlUtil.cpp \
 CHttp.cpp \
 CTcp.cpp \
-CThread.cpp \
-CThreadPool.cpp
 
-C_SRC = \
-pthread_rdwr.c \
+OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
-CPP_OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CPP_SRC))
-
-C_OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(C_SRC))
-
-CPPFLAGS = \
+CFLAGS = \
 -I$(INC_DIR) \
 -I. \
 -I../../CArgs/include \
 -I../../CImageLib/include \
 -I../../CFile/include \
+-I../../CThread/include \
 -I../../COS/include \
 -I../../CRegExp/include \
 -I../../CMath/include \
@@ -60,24 +53,23 @@ $(LEBUG) \
 -L../../CArgs/lib \
 -L../../CImageLib/lib \
 -L../../CFile/lib \
+-L../../CThread/lib \
 -L../../COS/lib \
 -L../../CRegExp/lib \
 -L../../CStrUtil/lib \
 -lCArgs \
 -lCImageLib \
+-lCThread \
 -lCFile \
 -lCOS \
 -lCRegExp \
 -lCStrUtil \
--pthread
+-pthread -ltre
 
 .SUFFIXES: .cpp
 
-$(CPP_OBJS): $(OBJ_DIR)/%.o: %.cpp
-	$(CPP_CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
+$(OBJS): $(OBJ_DIR)/%.o: %.cpp
+	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CFLAGS)
 
-$(C_OBJS): $(OBJ_DIR)/%.o: %.c
-	$(C_CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
-
-$(BIN_DIR)/CWebGet: $(CPP_OBJS) $(C_OBJS)
-	$(CPP_CC) -o $(BIN_DIR)/CWebGet $(CPP_OBJS) $(C_OBJS) $(LFLAGS) -ltre
+$(BIN_DIR)/CWebGet: $(OBJS)
+	$(CC) -o $(BIN_DIR)/CWebGet $(OBJS) $(LFLAGS)
