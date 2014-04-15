@@ -8,6 +8,7 @@
 #include <cstring>
 #include <cstdio>
 #include <iostream>
+#include <unistd.h>
 
 #define CTCP_WRITE_WAIT 5
 #define CTCP_READ_WAIT  5
