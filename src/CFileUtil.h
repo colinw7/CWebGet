@@ -1,5 +1,6 @@
 #include <CFileType.h>
 #include <CStrUtil.h>
+#include <cstring>
 
 class CFile;
 
