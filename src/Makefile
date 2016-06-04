@@ -35,6 +35,7 @@ CTcp.cpp \
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CFLAGS = \
+-std=c++11 \
 -I$(INC_DIR) \
 -I. \
 -I../../CArgs/include \

@@ -162,7 +162,7 @@ download(CHttpData &data)
 
     int len;
 
-    if (sscanf(line.c_str(), "%x", &len) != 1)
+    if (sscanf(line.c_str(), "%d", &len) != 1)
       len = 0;
 
     if (debug_)
@@ -198,7 +198,7 @@ download(CHttpData &data)
 
       data.data = readLine(data.data, line);
 
-      if (sscanf(line.c_str(), "%x", &len) != 1)
+      if (sscanf(line.c_str(), "%d", &len) != 1)
         len = 0;
 
       if (debug_)
