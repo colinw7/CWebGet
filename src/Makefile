@@ -40,6 +40,7 @@ CFLAGS = \
 -I. \
 -I../../CArgs/include \
 -I../../CImageLib/include \
+-I../../CFileUtil/include \
 -I../../CFile/include \
 -I../../CThread/include \
 -I../../COS/include \
@@ -53,6 +54,7 @@ $(LEBUG) \
 -L$(LIB_DIR) \
 -L../../CArgs/lib \
 -L../../CImageLib/lib \
+-L../../CFileUtil/lib \
 -L../../CFile/lib \
 -L../../CThread/lib \
 -L../../COS/lib \
@@ -61,6 +63,7 @@ $(LEBUG) \
 -lCArgs \
 -lCImageLib \
 -lCThread \
+-lCFileUtil \
 -lCFile \
 -lCOS \
 -lCRegExp \
