@@ -433,7 +433,7 @@ isValidSite(CWebGetUrl &web_url)
 {
   const CUrl &url = web_url.getUrl();
 
-  if (url.getPrefix() != "http")
+  if (url.getPrefix() != "http" && url.getPrefix() != "https")
     return false;
 
   const std::string &site = url.getSite();
@@ -600,7 +600,7 @@ std::string
 CWebGetUrl::
 encodeUrl(const CUrl &url)
 {
-  std::string url_str = std::string("http://") + url.getSite() + "/" + url.getFile();
+  std::string url_str = url.getPrefix() + std::string("://") + url.getSite() + "/" + url.getFile();
 
   CStrWords word_list = CStrUtil::toFields(url_str, "/");
 

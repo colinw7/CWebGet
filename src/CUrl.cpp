@@ -225,7 +225,7 @@ decode()
 
   //----
 
-  if      (prefix_ == "http") {
+  if      (prefix_ == "http" || prefix_ == "https") {
     if (url1.size() > 0 && url1[0] == '/')
       url1 = url1.substr(1);
 

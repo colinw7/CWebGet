@@ -69,7 +69,7 @@ class CUrl {
   SearchList  searches_;
   std::string target_;
   std::string full_url_;
-  bool        is_dir_;
+  bool        is_dir_ { false };
 };
 
 #endif
