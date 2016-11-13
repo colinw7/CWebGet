@@ -20,15 +20,6 @@ SRC = \
 CWebGetMain.cpp \
 CWebGet.cpp \
 CUrl.cpp \
-CHtmlComment.cpp \
-CHtml.cpp \
-CHtmlNamedChar.cpp \
-CHtmlParser.cpp \
-CHtmlTag.cpp \
-CHtmlTagDef.cpp \
-CHtmlText.cpp \
-CHtmlToken.cpp \
-CHtmlUtil.cpp \
 CHttp.cpp \
 CTcp.cpp \
 
@@ -38,6 +29,7 @@ CFLAGS = \
 -std=c++11 \
 -I$(INC_DIR) \
 -I. \
+-I../../CHtml/include \
 -I../../CArgs/include \
 -I../../CImageLib/include \
 -I../../CFileUtil/include \
@@ -52,6 +44,7 @@ CFLAGS = \
 LFLAGS = \
 $(LEBUG) \
 -L$(LIB_DIR) \
+-L../../CHtml/lib \
 -L../../CArgs/lib \
 -L../../CImageLib/lib \
 -L../../CFileUtil/lib \
@@ -60,6 +53,7 @@ $(LEBUG) \
 -L../../COS/lib \
 -L../../CRegExp/lib \
 -L../../CStrUtil/lib \
+-lCHtml \
 -lCArgs \
 -lCImageLib \
 -lCThread \

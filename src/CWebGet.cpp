@@ -357,10 +357,10 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
 
     CHtmlTagId id = tag_def.getId();
 
-    if (id != CHTML_TAG_ID_A     &&
-        id != CHTML_TAG_ID_BODY  &&
-        id != CHTML_TAG_ID_IMG   &&
-        id != CHTML_TAG_ID_FRAME)
+    if (id != CHtmlTagId::A     &&
+        id != CHtmlTagId::BODY  &&
+        id != CHtmlTagId::IMG   &&
+        id != CHtmlTagId::FRAME)
       continue;
 
     const CHtmlTagOptionArray &options = tag->getOptions();
@@ -372,10 +372,10 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
 
       std::string option_name = option->getName();
 
-      if ((id == CHTML_TAG_ID_A     && CStrUtil::casecmp(option_name, "href"      ) == 0) ||
-          (id == CHTML_TAG_ID_BODY  && CStrUtil::casecmp(option_name, "background") == 0) ||
-          (id == CHTML_TAG_ID_IMG   && CStrUtil::casecmp(option_name, "src"       ) == 0) ||
-          (id == CHTML_TAG_ID_FRAME && CStrUtil::casecmp(option_name, "src"       ) == 0)) {
+      if ((id == CHtmlTagId::A     && CStrUtil::casecmp(option_name, "href"      ) == 0) ||
+          (id == CHtmlTagId::BODY  && CStrUtil::casecmp(option_name, "background") == 0) ||
+          (id == CHtmlTagId::IMG   && CStrUtil::casecmp(option_name, "src"       ) == 0) ||
+          (id == CHtmlTagId::FRAME && CStrUtil::casecmp(option_name, "src"       ) == 0)) {
         std::string option_value = option->getValue();
 
         std::string save_site = CUrl::getCurrentSite();
