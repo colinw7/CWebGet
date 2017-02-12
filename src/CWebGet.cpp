@@ -25,13 +25,22 @@ class CWebGetLoadPageProc : public CThreadArrayProc {
 };
 
 CWebGet::
-CWebGet(const std::string &base_url) :
- base_url_   (base_url),
- debug_      (false),
- http_debug_ (false),
- tcp_debug_  (false),
- overwrite_  (false),
- use_threads_(false)
+CWebGet(const std::string &str) :
+ base_url_(str)
+{
+  init();
+}
+
+CWebGet::
+CWebGet(const CUrl &url) :
+ base_url_(url)
+{
+  init();
+}
+
+void
+CWebGet::
+init()
 {
   base_dir_ = CDir::getCurrent();
 
@@ -246,11 +255,22 @@ download(CWebGetUrl &web_url, CFile *file)
     if (debug_)
       std::cerr << "Redirected to " << new_location << std::endl;
 
+    if (new_location == web_url.getUrlStr()) {
+      std::cerr << "New location same as old location" << std::endl;
+      return false;
+    }
+
     CUrl url(new_location);
 
     CWebGetUrl web_url1(web_url.getWebGet(), url);
 
     flag = getPage(web_url1);
+  }
+
+  if (! flag) {
+    CFile file(".error_data");
+
+    file.write(data.data);
   }
 
   return flag;
@@ -392,7 +412,7 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
 
         CUrl url(option_value);
 
-        CWebGetUrl *web_url1 = new CWebGetUrl(this, url.getFullUrl());
+        CWebGetUrl *web_url1 = new CWebGetUrl(this, CUrl(url.getFullUrl()));
 
         CUrl::setCurrentSite(save_site);
 
@@ -557,6 +577,8 @@ isHtmlFile(CWebGetUrl &web_url)
   return true;
 }
 
+//------
+
 void *
 CWebGetLoadPageProc::
 execute()
@@ -568,8 +590,10 @@ execute()
   return NULL;
 }
 
+//------
+
 CWebGetUrl::
-CWebGetUrl(CWebGet *webget, CUrl url) :
+CWebGetUrl(CWebGet *webget, const CUrl &url) :
  webget_(webget), url_(url)
 {
   url_str_ = encodeUrl(url_);

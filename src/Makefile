@@ -1,23 +1,16 @@
 CC = g++
-
+AR = ar
 RM = rm
 
 CDEBUG = -g
-LDEBUG = -g
 
 INC_DIR = ../include
 OBJ_DIR = ../obj
 LIB_DIR = ../lib
-BIN_DIR = ../bin
 
-all: $(BIN_DIR)/CWebGet
-
-clean:
-	$(RM) -f $(OBJ_DIR)/*.o
-	$(RM) -f $(BIN_DIR)/CWebGet
+all: $(LIB_DIR)/libCWebGet.a
 
 SRC = \
-CWebGetMain.cpp \
 CWebGet.cpp \
 CUrl.cpp \
 CHttp.cpp \
@@ -25,7 +18,7 @@ CTcp.cpp \
 
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
-CFLAGS = \
+CPPFLAGS = \
 -std=c++11 \
 -I$(INC_DIR) \
 -I. \
@@ -41,33 +34,15 @@ CFLAGS = \
 -I../../CStrUtil/include \
 -I../../CUtil/include \
 
-LFLAGS = \
-$(LEBUG) \
--L$(LIB_DIR) \
--L../../CHtml/lib \
--L../../CArgs/lib \
--L../../CImageLib/lib \
--L../../CFileUtil/lib \
--L../../CFile/lib \
--L../../CThread/lib \
--L../../COS/lib \
--L../../CRegExp/lib \
--L../../CStrUtil/lib \
--lCHtml \
--lCArgs \
--lCImageLib \
--lCThread \
--lCFileUtil \
--lCFile \
--lCOS \
--lCRegExp \
--lCStrUtil \
--pthread -ltre
+clean:
+	$(RM) -f $(OBJ_DIR)/*.o
+	$(RM) -f $(LIB_DIR)/libCWebGet.a
+
+$(OBJS): $(OBJ_DIR)/%.o: %.cpp
+	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
 
 .SUFFIXES: .cpp
 
-$(OBJS): $(OBJ_DIR)/%.o: %.cpp
-	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CFLAGS)
+$(LIB_DIR)/libCWebGet.a: $(OBJS)
+	$(AR) crv $(LIB_DIR)/libCWebGet.a $(OBJS)
 
-$(BIN_DIR)/CWebGet: $(OBJS)
-	$(CC) -o $(BIN_DIR)/CWebGet $(OBJS) $(LFLAGS)

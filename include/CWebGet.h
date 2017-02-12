@@ -21,7 +21,9 @@ class CWebGet {
   typedef std::vector<CWebGetUrl *> WebUrlList;
 
  public:
-  CWebGet(const std::string &base_url);
+  CWebGet(const std::string &str);
+  CWebGet(const CUrl &url);
+
  ~CWebGet();
 
   void setDebug(bool debug);
@@ -54,6 +56,8 @@ class CWebGet {
   bool isLoaded(CWebGetUrl &web_url);
 
  private:
+  void init();
+
   bool download(CWebGetUrl &web_url, CFile *file);
 
   void listRef(CWebGetUrl &web_url);
@@ -69,23 +73,25 @@ class CWebGet {
   bool isHtmlFile(CWebGetUrl &web_url);
 
  private:
-  CUrl           base_url_;
-  bool           debug_;
-  bool           http_debug_;
-  bool           tcp_debug_;
-  bool           overwrite_;
-  bool           list_refs_;
-  bool           use_threads_;
-  std::string    base_dir_;
-  SiteList       sites_;
-  LoadedUrlsMap  loaded_urls_;
-  CThreadArray  *thread_array_;
-  CThreadMutex  *mutex_;
+  CUrl          base_url_;
+  bool          debug_ { false };
+  bool          http_debug_ { false };
+  bool          tcp_debug_ { false };
+  bool          overwrite_ { false };
+  bool          list_refs_ { false };
+  bool          use_threads_ { false };
+  std::string   base_dir_;
+  SiteList      sites_;
+  LoadedUrlsMap loaded_urls_;
+  CThreadArray* thread_array_ { nullptr };
+  CThreadMutex* mutex_ { nullptr };
 };
+
+//------
 
 class CWebGetUrl {
  public:
-  CWebGetUrl(CWebGet *webget, CUrl url);
+  CWebGetUrl(CWebGet *webget, const CUrl &url);
  ~CWebGetUrl();
 
   CWebGet *getWebGet() const { return webget_; }
@@ -111,12 +117,12 @@ class CWebGetUrl {
   void setCurrentSite() const;
 
  private:
-  CWebGet     *webget_;
-  CUrl         url_;
-  std::string  url_str_;
-  std::string  filename_;
-  CFile   *file_;
-  bool     process_;
+  CWebGet*    webget_ { nullptr };
+  CUrl        url_;
+  std::string url_str_;
+  std::string filename_;
+  CFile*      file_ { nullptr };
+  bool        process_ { false };
 };
 
 #endif

@@ -99,7 +99,9 @@ loadUrl(const string &url_str, bool overwrite, bool follow_links,
     webget.addSite(sites[i]);
 
   try {
-    CWebGetUrl web_url(&webget, url_str);
+    CUrl url(url_str);
+
+    CWebGetUrl web_url(&webget, url);
 
     if (webget.loadPage(web_url)) {
       if (follow_links && web_url.getProcess())

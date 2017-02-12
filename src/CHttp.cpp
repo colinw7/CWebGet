@@ -5,9 +5,77 @@
 #include <CStrUtil.h>
 #include <cstdio>
 
+namespace {
+
+class Parser {
+ public:
+  Parser(const std::string &str) :
+   str_(str), pos_(0), len_(str.size()) {
+  }
+
+  void skipSpace() {
+    while (pos_ < len_ && isspace(str_[pos_]))
+      ++pos_;
+  }
+
+  std::string readWord() {
+    skipSpace();
+
+    int j = pos_;
+
+    while (pos_ < len_ && (isalnum(str_[pos_]) || str_[pos_] == '_'))
+      ++pos_;
+
+    std::string word = str_.substr(j, pos_ - j);
+
+    return word;
+  }
+
+  int readInteger() {
+    std::string word = readWord();
+
+    if (! CStrUtil::isInteger(word))
+      return -1;
+
+    return CStrUtil::toInteger(word);
+  }
+
+  bool skipChar(char c) {
+    skipSpace();
+
+    if (pos_ >= len_ || str_[pos_] != c)
+      return false;
+
+    ++pos_;
+
+    return true;
+  }
+
+ private:
+  std::string str_;
+  int         pos_ { 0 };
+  int         len_ { 0 };
+};
+
+int monthNameToInt(const std::string &name) {
+  typedef std::vector<std::string> Names;
+
+  static Names months = {{ "jan", "feb", "mar", "apr", "may", "jun",
+                           "jul", "aug", "sep", "oct", "nov", "dec" }};
+
+  for (uint i = 0; i < months.size(); ++i)
+    if (name == months[i])
+      return i;
+
+  return 0;
+}
+
+}
+
+//---
+
 CHttp::
-CHttp(const std::string &url) :
- debug_(false), chunked_(false)
+CHttp(const std::string &url)
 {
   url_ = new CUrl(url);
   tcp_ = new CTcp;
@@ -83,8 +151,8 @@ download(CHttpData &data)
   if (debug_)
     std::cerr << line << std::endl;
 
-  relocated_    = false;
-  new_location_ = "";
+  relocated_   = false;
+  newLocation_ = "";
 
   std::vector<std::string> words;
 
@@ -121,24 +189,29 @@ download(CHttpData &data)
     if (debug_)
       std::cerr << name << ":" << value << std::endl;
 
-    if (name == "Transfer-Encoding" && value == "chunked")
-      chunked_ = true;
-
-    if (name == "Content-Type")
+    if      (name == "Transfer-Encoding") {
+      if (value == "chunked")
+        chunked_ = true;
+    }
+    else if (name == "Content-Type") {
       decodeContent(value, data.type, data.sub_type);
-
-    if (name == "Content-Length")
+    }
+    else if (name == "Content-Length") {
       data_length = CStrUtil::toInteger(value);
-
-    if (name == "Location")
-      new_location_ = value;
+    }
+    else if (name == "Location") {
+      newLocation_ = value;
+    }
+    else if (name == "Last-Modified") {
+      decodeDate(value, lastModified_);
+    }
 
     data.data = readLine(data.data, line);
   }
 
   if (relocated_) {
-    if (new_location_ != "") {
-      std::cerr << "Moved to " << new_location_ << std::endl;
+    if (newLocation_ != "") {
+      std::cerr << "Moved to " << newLocation_ << std::endl;
       return true;
     }
     else {
@@ -160,16 +233,16 @@ download(CHttpData &data)
 
     data.data = readLine(data.data, line);
 
-    int len;
+    uint len;
 
-    if (sscanf(line.c_str(), "%d", &len) != 1)
+    if (sscanf(line.c_str(), "%x", &len) != 1)
       len = 0;
 
     if (debug_)
       std::cerr << line << "=" << len << std::endl;
 
     while (len > 0) {
-      while ((int) data.data.size() < len) {
+      while (data.data.size() < len) {
         data1 += data.data;
 
         len -= data.data.size();
@@ -178,7 +251,7 @@ download(CHttpData &data)
           return false;
       }
 
-      if ((int) data.data.size() >= len) {
+      if (data.data.size() >= len) {
         data1 += data.data.substr(0, len);
 
         data.data = data.data.substr(len);
@@ -198,7 +271,7 @@ download(CHttpData &data)
 
       data.data = readLine(data.data, line);
 
-      if (sscanf(line.c_str(), "%d", &len) != 1)
+      if (sscanf(line.c_str(), "%x", &len) != 1)
         len = 0;
 
       if (debug_)
@@ -312,4 +385,47 @@ decodeContent(const std::string &value, std::string &type, std::string &sub_type
 
   type     = CStrUtil::stripSpaces(type);
   sub_type = CStrUtil::stripSpaces(sub_type);
+}
+
+bool
+CHttp::
+decodeDate(const std::string &value, time_t &t)
+{
+  Parser parser(value);
+
+  std::string dayName = parser.readWord();
+
+  parser.skipChar(',');
+
+  int dayNum   = parser.readInteger();
+  int monthNum = monthNameToInt(CStrUtil::toLower(parser.readWord()));
+  int yearNum  = parser.readInteger();
+
+  int hourNum = parser.readInteger();
+  parser.skipChar(':');
+  int minNum  = parser.readInteger();
+  parser.skipChar(':');
+  int secNum  = parser.readInteger();
+
+  (void) parser.readWord(); // GMT
+
+  //---
+
+  struct tm tm;
+
+  tm.tm_year  = yearNum - 1900;
+  tm.tm_mon   = monthNum;
+  tm.tm_mday  = dayNum;
+  tm.tm_hour  = hourNum;
+  tm.tm_min   = minNum;
+  tm.tm_sec   = secNum;
+  tm.tm_wday  = 0;
+  tm.tm_yday  = 0;
+  tm.tm_isdst = -1; // auto DST
+
+  t = mktime(&tm);
+
+  //---
+
+  return true;
 }

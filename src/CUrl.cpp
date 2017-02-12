@@ -3,9 +3,7 @@
 #include <CFile.h>
 #include <CStrUtil.h>
 
-using std::string;
-
-string CUrl::current_site_ = ".";
+std::string CUrl::current_site_ = ".";
 
 CUrl::
 CUrl()
@@ -21,7 +19,7 @@ CUrl(const CFile &file)
 }
 
 CUrl::
-CUrl(const string &url) :
+CUrl(const std::string &url) :
  url_(url)
 {
   decode();
@@ -29,9 +27,9 @@ CUrl(const string &url) :
 
 bool
 CUrl::
-getSearch(const string &name, bool *value) const
+getSearch(const std::string &name, bool *value) const
 {
-  string value1;
+  std::string value1;
 
   if (! getSearch(name, value1))
     return false;
@@ -44,9 +42,9 @@ getSearch(const string &name, bool *value) const
 
 bool
 CUrl::
-getSearch(const string &name, int *value) const
+getSearch(const std::string &name, int *value) const
 {
-  string value1;
+  std::string value1;
 
   if (! getSearch(name, value1))
     return false;
@@ -59,9 +57,9 @@ getSearch(const string &name, int *value) const
 
 bool
 CUrl::
-getSearch(const string &name, double *value) const
+getSearch(const std::string &name, double *value) const
 {
-  string value1;
+  std::string value1;
 
   if (! getSearch(name, value1))
     return false;
@@ -74,7 +72,7 @@ getSearch(const string &name, double *value) const
 
 bool
 CUrl::
-getSearch(const string &name, string &value) const
+getSearch(const std::string &name, std::string &value) const
 {
   SearchList::const_iterator p = searches_.find(name);
 
@@ -88,28 +86,28 @@ getSearch(const string &name, string &value) const
 
 void
 CUrl::
-setSearch(const string &name, bool value)
+setSearch(const std::string &name, bool value)
 {
   setSearch(name, CStrUtil::toString(value));
 }
 
 void
 CUrl::
-setSearch(const string &name, int value)
+setSearch(const std::string &name, int value)
 {
   setSearch(name, CStrUtil::toString(value));
 }
 
 void
 CUrl::
-setSearch(const string &name, double value)
+setSearch(const std::string &name, double value)
 {
   setSearch(name, CStrUtil::toString(value));
 }
 
 void
 CUrl::
-setSearch(const string &name, const string &value)
+setSearch(const std::string &name, const std::string &value)
 {
   SearchList::iterator p = searches_.find(name);
 
@@ -123,15 +121,15 @@ void
 CUrl::
 decode()
 {
-  string url1 = url_;
+  std::string url1 = url_;
 
-  string::size_type pos;
+  std::string::size_type pos;
 
   // Remove target
 
   pos = url1.rfind('#');
 
-  if (pos != string::npos) {
+  if (pos != std::string::npos) {
     target_ = url1.substr(pos + 1);
 
     url1 = url1.substr(0, pos);
@@ -145,10 +143,10 @@ decode()
 
   pos = url1.rfind('?');
 
-  if (pos != string::npos) {
-    string search, name, value;
+  if (pos != std::string::npos) {
+    std::string search, name, value;
 
-    string searches = url1.substr(pos + 1);
+    std::string searches = url1.substr(pos + 1);
 
     url1 = url1.substr(0, pos);
 
@@ -156,14 +154,14 @@ decode()
 
     pos = searches.find('&');
 
-    while (pos != string::npos) {
+    while (pos != std::string::npos) {
       search = searches.substr(0, pos);
 
       searches = searches.substr(pos + 1);
 
       pos = search.find('=');
 
-      if (pos != string::npos) {
+      if (pos != std::string::npos) {
         name  = search.substr(0, pos);
         value = search.substr(pos + 1);
       }
@@ -179,7 +177,7 @@ decode()
 
     pos = searches.find('=');
 
-    if (pos != string::npos) {
+    if (pos != std::string::npos) {
       name  = searches.substr(0, pos);
       value = searches.substr(pos + 1);
     }
@@ -213,28 +211,28 @@ decode()
 
   pos = url1.find(':');
 
-  if (pos != string::npos) {
-    prefix_ = url1.substr(0, pos);
+  if (pos != std::string::npos) {
+    setPrefix(url1.substr(0, pos));
 
     url1 = url1.substr(pos + 1);
 
-    CStrUtil::toLower(prefix_);
+    CStrUtil::toLower(getPrefix());
   }
   else
-    prefix_ = "";
+    setPrefix("");
 
   //----
 
-  if      (prefix_ == "http" || prefix_ == "https") {
+  if      (isHttp()) {
     if (url1.size() > 0 && url1[0] == '/')
       url1 = url1.substr(1);
 
     if (url1.size() > 0 && url1[0] == '/')
       url1 = url1.substr(1);
 
-    string::size_type file_separator_pos = url1.find('/');
+    std::string::size_type file_separator_pos = url1.find('/');
 
-    if (file_separator_pos != string::npos) {
+    if (file_separator_pos != std::string::npos) {
       site_ = url1.substr(0, file_separator_pos);
 
       file_ = url1.substr(file_separator_pos + 1);
@@ -245,7 +243,7 @@ decode()
       file_ = "";
     }
   }
-  else if (prefix_ == "file") {
+  else if (isFile()) {
     if (url1.size() > 0 && url1[0] == '/')
       url1 = url1.substr(1);
 
@@ -255,7 +253,7 @@ decode()
     if      (current_site_ != ".")
       site_ = current_site_;
     else if (url1.size() > 0 && url1[0] == '/') {
-      string::size_type pos = url1.rfind('/');
+      std::string::size_type pos = url1.rfind('/');
 
       site_ = url1.substr(0, pos);
       url1  = url1.substr(pos + 1);
@@ -266,15 +264,15 @@ decode()
     file_ = url1;
   }
   else {
-    if (prefix_ == "") {
+    if (getPrefix() == "") {
       if (current_site_ != ".") {
-        prefix_ = "http";
+        setPrefix("http");
 
         if (url1.size() > 0 && url1[0] == '/')
           url1 = url1.substr(1);
       }
       else
-        prefix_ = "file";
+        setPrefix("file");
     }
 
     if (current_site_ != ".")
@@ -293,19 +291,28 @@ decode()
 
   pos = file_.rfind('.');
 
-  if (pos != string::npos)
+  if (pos != std::string::npos)
     suffix_ = file_.substr(pos + 1);
   else
     suffix_ = "";
 
   suffix_ = CStrUtil::toLower(suffix_);
 
-  full_url_ = prefix_ + "://" + site_ + "/";
+  full_url_ = getPrefix() + "://" + site_ + "/";
 
-  if (file_ != "")
-    full_url_ += file_;
-  else
-    full_url_ += "index.html";
+  if (file_ != "") {
+    std::string::size_type file_separator_pos = file_.rfind('/');
+
+    if (file_separator_pos != std::string::npos)
+      local_file_ = file_.substr(file_separator_pos + 1);
+    else
+      local_file_ = file_;
+  }
+  else {
+    local_file_ = "index.html";
+  }
+
+  full_url_ += local_file_;
 
   if (! searches_.empty()) {
     full_url_ += "?";
@@ -328,15 +335,15 @@ decode()
     full_url_ += "#" + target_;
 }
 
-string
+std::string
 CUrl::
 encode() const
 {
-  string file = getFile();
+  std::string file = getFile();
 
-  string file1 = encodeFile(file);
+  std::string file1 = encodeFile(file);
 
-  string url_str = getPrefix() + "://" + getSite() + "/" + file1;
+  std::string url_str = getPrefix() + "://" + getSite() + "/" + file1;
 
   if (getIsDir())
     url_str += "/";
@@ -344,93 +351,72 @@ encode() const
   return url_str;
 }
 
-string
+std::string
 CUrl::
-encodeFile(const string &file) const
+encodeFile(const std::string &file) const
 {
-  // Remove .. parts
+  // Remove leading/trailing '/'
+  std::string file1 = file;
 
-  CStrWords word_list = CStrUtil::toFields(file, "/");
+  bool absolute = false;
 
-  CStrWords::iterator word_p1 = word_list.begin();
-  CStrWords::iterator word_p2 = word_list.end  ();
+  while (! file1.empty() && file1[0] == '/') {
+    file1 = file1.substr(1);
 
-  if (word_p1 == word_p2)
-    return file;
-
-  string file1;
-
-  string word1 = (*word_p1).getWord();
-
-  if (word1 == "..")
-    return file;
-
-  ++word_p1;
-
-  for ( ; word_p1 != word_p2; ++word_p1) {
-    string word2 = (*word_p1).getWord();
-
-    if (word2 == "..") {
-      ++word_p1;
-
-      if (word_p1 == word_p2) {
-        word1 = "";
-
-        break;
-      }
-
-      word1 = (*word_p1).getWord();
-    }
-    else {
-      if (file1 != "")
-        file1 += "/";
-
-      file1 += word1;
-
-      word1 = word2;
-    }
+    absolute = true;
   }
 
-  if (word1 != "") {
-    if (file1 != "")
-      file1 += "/";
-
-    file1 += word1;
+  while (! file1.empty() && file1[file1.size() - 1] == '/') {
+    file1 = file1.substr(0, file1.size() - 1);
   }
 
-  //------
+  // split into parts
+  std::vector<std::string> fields;
 
-  // Remove . parts
+  CStrUtil::addFields(file1, fields, "/");
 
-  word_list = CStrUtil::toFields(file1, "/");
+  if (fields.empty())
+    return file;
 
-  word_p1 = word_list.begin();
-  word_p2 = word_list.end  ();
+  // Remove . and .. parts
+  std::vector<std::string> fields1;
 
-  if (word_p1 == word_p2)
-    return file1;
-
-  string file2;
-
-  for ( ; word_p1 != word_p2; ++word_p1) {
-    string word1 = (*word_p1).getWord();
-
-    if (word1 != ".") {
-      if (file2 != "")
-        file2 += "/";
-
-      file2 += word1;
+  for (uint i = 0; i < fields.size(); ++i) {
+    if      (fields[i] == ".") {
+      if (fields1.empty())
+        return file;
     }
+    else if (fields[i] == "..") {
+      if (fields1.empty())
+        return file;
+
+      fields1.pop_back();
+    }
+    else
+      fields1.push_back(fields[i]);
+  }
+
+  // rebuild filename
+  std::string file2;
+
+  if (absolute)
+    file2 += "/";
+
+  for (uint i = 0; i < fields1.size(); ++i) {
+    if (! file2.empty() && file2[file2.size() - 1] != '/')
+      file2 += "/";
+
+    file2 += fields1[i];
   }
 
   return file2;
 }
 
-string
+std::string
 CUrl::
-replaceSpecialChars(const string &str)
+replaceSpecialChars(const std::string &str)
 {
-  string str1;
+  std::string str1;
 
   uint len = str.size();
 
@@ -439,7 +425,7 @@ replaceSpecialChars(const string &str)
         isxdigit(str[i + 1]) && isxdigit(str[i + 2])) {
       uint hval;
 
-      string hstr = str.substr(i + 1, 2);
+      std::string hstr = str.substr(i + 1, 2);
 
       CStrUtil::decodeHexString(hstr, &hval);
 

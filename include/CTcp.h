@@ -31,8 +31,8 @@ class CTcp {
   bool inetConnect(const std::string &hostname, unsigned short port);
 
  private:
-  int  tcp_socket_;
-  bool debug_;
+  int  tcp_socket_ { -1 };
+  bool debug_ { false };
 };
 
 #endif

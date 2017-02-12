@@ -14,8 +14,7 @@
 #define CTCP_READ_WAIT  5
 
 CTcp::
-CTcp() :
- tcp_socket_(-1), debug_(false)
+CTcp()
 {
 }
 

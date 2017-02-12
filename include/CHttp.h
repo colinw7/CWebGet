@@ -21,6 +21,8 @@ struct CHttpData {
   }
 };
 
+//---
+
 class CHttp {
  public:
   CHttp(const std::string &url);
@@ -35,7 +37,7 @@ class CHttp {
 
   bool isRelocated() const { return relocated_; }
 
-  std::string getNewLocation() const { return new_location_; }
+  std::string getNewLocation() const { return newLocation_; }
 
  private:
   bool getMoreData(const std::string &site, std::string &more_data);
@@ -47,13 +49,16 @@ class CHttp {
 
   void decodeContent(const std::string &value, std::string &type, std::string &sub_type);
 
+  bool decodeDate(const std::string &value, time_t &t);
+
  private:
-  CUrl        *url_;
-  CTcp        *tcp_;
-  bool         debug_;
-  bool         chunked_;
-  bool         relocated_;
-  std::string  new_location_;
+  CUrl        *url_ { nullptr };
+  CTcp        *tcp_ { nullptr };
+  bool         debug_ { false };
+  bool         chunked_ { false };
+  bool         relocated_ { false };
+  std::string  newLocation_;
+  time_t       lastModified_;
 };
 
 #endif
