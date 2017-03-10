@@ -201,7 +201,7 @@ getPage(CWebGetUrl &web_url)
     if (debug_)
       std::cerr << "Dir " << CDir::getCurrent() << std::endl;
 
-    file->open(CFileBase::WRITE);
+    file->open(CFileBase::Mode::WRITE);
 
     CDir::leave();
 
