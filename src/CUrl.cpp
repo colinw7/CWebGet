@@ -114,7 +114,7 @@ setSearch(const std::string &name, const std::string &value)
   if (p == searches_.end())
     searches_[name] = value;
   else
-    (*p).second = value;;
+    (*p).second = value;
 }
 
 void
