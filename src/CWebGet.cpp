@@ -268,9 +268,9 @@ download(CWebGetUrl &web_url, CFile *file)
   }
 
   if (! flag) {
-    CFile file(".error_data");
+    CFile file1(".error_data");
 
-    file.write(data.data);
+    file1.write(data.data);
   }
 
   return flag;
