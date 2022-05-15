@@ -253,10 +253,10 @@ decode()
     if      (current_site_ != ".")
       site_ = current_site_;
     else if (url1.size() > 0 && url1[0] == '/') {
-      std::string::size_type pos = url1.rfind('/');
+      std::string::size_type pos1 = url1.rfind('/');
 
-      site_ = url1.substr(0, pos);
-      url1  = url1.substr(pos + 1);
+      site_ = url1.substr(0, pos1);
+      url1  = url1.substr(pos1 + 1);
     }
     else
       site_ = COSFile::getCurrentDir();

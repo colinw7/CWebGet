@@ -396,10 +396,10 @@ inetConnect(const std::string &hostname, ushort port)
       if (getDebug()) {
         char host[NI_MAXHOST], service[NI_MAXSERV];
 
-        int rc = getnameinfo(rp->ai_addr, rp->ai_addrlen, host, NI_MAXHOST,
-                             service, NI_MAXSERV, NI_NUMERICSERV);
+        int rc1 = getnameinfo(rp->ai_addr, rp->ai_addrlen, host, NI_MAXHOST,
+                              service, NI_MAXSERV, NI_NUMERICSERV);
 
-        if (rc != -1)
+        if (rc1 != -1)
           std::cerr << "connected to " << host << ":" << service << std::endl;
       }
 
