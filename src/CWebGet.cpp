@@ -11,17 +11,17 @@
 #include <CThread.h>
 
 class CWebGetLoadPageProc : public CThreadArrayProc {
- private:
-  CWebGetUrl *web_url_;
-
  public:
-  CWebGetLoadPageProc(CThreadArray *array, CWebGetUrl *web_url_) :
-   CThreadArrayProc(array), web_url_(web_url_) {
+  CWebGetLoadPageProc(CThreadArray *array, CWebGetUrl *web_url) :
+   CThreadArrayProc(array), web_url_(web_url) {
   }
 
   void *execute();
 
   bool getProcess() const { return web_url_->getProcess(); }
+
+ private:
+  CWebGetUrl *web_url_ { nullptr };
 };
 
 CWebGet::
@@ -158,14 +158,14 @@ loadPage(CWebGetUrl &web_url)
   std::string base_dir = web_url.getBaseDir();
 
   if (isHigherDir(base_dir)) {
-    std::cerr << "Skipping Higher Directory " << base_dir << std::endl;
+    std::cerr << "Skipping Higher Directory " << base_dir << "\n";
     return true;
   }
 
-  std::cout << "Loading Page '" << web_url.getUrlStr() << "'" << std::endl;
+  std::cout << "Loading Page '" << web_url.getUrlStr() << "'\n";
 
   if (debug_)
-    std::cerr << "Output File '" << web_url.getFilename() << "'" << std::endl;
+    std::cerr << "Output File '" << web_url.getFilename() << "'\n";
 
   if (! getPage(web_url))
     return false;
@@ -199,14 +199,14 @@ getPage(CWebGetUrl &web_url)
     CDir::enter(path);
 
     if (debug_)
-      std::cerr << "Dir " << CDir::getCurrent() << std::endl;
+      std::cerr << "Dir " << CDir::getCurrent() << "\n";
 
     file->open(CFileBase::Mode::WRITE);
 
     CDir::leave();
 
     if (debug_)
-      std::cerr << "Dir " << CDir::getCurrent() << std::endl;
+      std::cerr << "Dir " << CDir::getCurrent() << "\n";
 
     if (use_threads_)
       mutex_->unlock();
@@ -225,7 +225,7 @@ CWebGet::
 download(CWebGetUrl &web_url, CFile *file)
 {
   if (debug_)
-    std::cerr << "Downloading " << web_url.getUrlStr() << std::endl;
+    std::cerr << "Downloading " << web_url.getUrlStr() << "\n";
 
   if (use_threads_)
     mutex_->lock();
@@ -253,10 +253,10 @@ download(CWebGetUrl &web_url, CFile *file)
     std::string new_location = http.getNewLocation();
 
     if (debug_)
-      std::cerr << "Redirected to " << new_location << std::endl;
+      std::cerr << "Redirected to " << new_location << "\n";
 
     if (new_location == web_url.getUrlStr()) {
-      std::cerr << "New location same as old location" << std::endl;
+      std::cerr << "New location same as old location\n";
       return false;
     }
 
@@ -285,9 +285,9 @@ processFile(CWebGetUrl &web_url)
   if (! getWebUrls(web_url, web_urls))
     return false;
 
-  uint num_web_urls = web_urls.size();
+  auto num_web_urls = web_urls.size();
 
-  CWebGetLoadPageProc **procs = NULL;
+  CWebGetLoadPageProc **procs = nullptr;
 
   if (use_threads_)
     procs = new CWebGetLoadPageProc * [num_web_urls];
@@ -309,7 +309,7 @@ processFile(CWebGetUrl &web_url)
   }
 
   if (use_threads_)
-    thread_array_->join(NULL);
+    thread_array_->join(nullptr);
 
   for (uint i = 0; i < num_web_urls; ++i) {
     if (web_urls[i]->getProcess())
@@ -341,12 +341,12 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
   std::string path = file->getDir();
 
   if (debug_)
-    std::cerr << "Read Html File " << file->getName() << std::endl;
+    std::cerr << "Read Html File " << file->getName() << "\n";
 
   CDir::enter(path);
 
   if (debug_)
-    std::cerr << "Dir " << CDir::getCurrent() << std::endl;
+    std::cerr << "Dir " << CDir::getCurrent() << "\n";
 
   CHtml html;
 
@@ -358,24 +358,24 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
     CDir::leave();
 
     if (debug_)
-      std::cerr << "Dir " << CDir::getCurrent() << std::endl;
+      std::cerr << "Dir " << CDir::getCurrent() << "\n";
 
     return false;
   }
 
   WebUrlMap web_url_map;
 
-  uint num_tokens = tokens.size();
+  auto num_tokens = tokens.size();
 
   for (uint i = 0; i < num_tokens; ++i) {
-    if (! tokens[i]->isTag())
+    if (! tokens[int(i)]->isTag())
       continue;
 
-    CHtmlTag *tag = tokens[i]->getTag();
+    auto *tag = tokens[int(i)]->getTag();
 
-    const CHtmlTagDef &tag_def = tag->getTagDef();
+    const auto &tag_def = tag->getTagDef();
 
-    CHtmlTagId id = tag_def.getId();
+    auto id = tag_def.getId();
 
     if (id != CHtmlTagId::A     &&
         id != CHtmlTagId::BODY  &&
@@ -385,22 +385,22 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
 
     const CHtmlTagOptionArray &options = tag->getOptions();
 
-    int num_options = (int) options.size();
+    auto num_options = options.size();
 
-    for (int j = 0; j < num_options; j++) {
-      CHtmlTagOption *option = options[j];
+    for (uint j = 0; j < num_options; j++) {
+      auto *option = options[j];
 
-      std::string option_name = option->getName();
+      auto option_name = option->getName();
 
       if ((id == CHtmlTagId::A     && CStrUtil::casecmp(option_name, "href"      ) == 0) ||
           (id == CHtmlTagId::BODY  && CStrUtil::casecmp(option_name, "background") == 0) ||
           (id == CHtmlTagId::IMG   && CStrUtil::casecmp(option_name, "src"       ) == 0) ||
           (id == CHtmlTagId::FRAME && CStrUtil::casecmp(option_name, "src"       ) == 0)) {
-        std::string option_value = option->getValue();
+        auto option_value = option->getValue();
 
-        std::string save_site = CUrl::getCurrentSite();
+        auto save_site = CUrl::getCurrentSite();
 
-        std::string site = save_site;
+        auto site = save_site;
 
         if (web_url.getUrl().getIsDir())
           site += "/" + web_url.getUrl().getFile();
@@ -408,7 +408,7 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
         CUrl::setCurrentSite(site);
 
         if (debug_)
-          std::cerr << option_value << std::endl;
+          std::cerr << option_value << "\n";
 
         CUrl url(option_value);
 
@@ -430,7 +430,7 @@ getWebUrls(CWebGetUrl &web_url, WebUrlList &web_urls)
   CDir::leave();
 
   if (debug_)
-    std::cerr << "Dir " << CDir::getCurrent() << std::endl;
+    std::cerr << "Dir " << CDir::getCurrent() << "\n";
 
   return true;
 }
@@ -442,7 +442,7 @@ listRef(CWebGetUrl &web_url)
   if (! isValidSite(web_url))
     return;
 
-  std::cerr << web_url.getUrlStr() << std::endl;
+  std::cerr << web_url.getUrlStr() << "\n";
 
   return;
 }
@@ -458,7 +458,7 @@ isValidSite(CWebGetUrl &web_url)
 
   const std::string &site = url.getSite();
 
-  for (int i = 0; i < (int) sites_.size(); i++) {
+  for (uint i = 0; i < sites_.size(); i++) {
     if (sites_[i] == site)
       return true;
   }
@@ -480,11 +480,11 @@ bool
 CWebGet::
 countDirLevels(const std::string &dir)
 {
-  int len = dir.size();
+  auto len = dir.size();
 
   int count = 0;
 
-  for (int i = 0; i < len; i++)
+  for (uint i = 0; i < len; i++)
     if (dir[i] == '/')
       count++;
 
@@ -587,7 +587,7 @@ execute()
 
   webget->loadSubPage(*web_url_);
 
-  return NULL;
+  return nullptr;
 }
 
 //------
