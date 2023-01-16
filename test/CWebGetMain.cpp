@@ -52,7 +52,7 @@ main(int argc, char **argv)
     string url1 = url.substr(0, pos1);
     string url2 = url.substr(pos1);
 
-    int count = 0;
+    uint count = 0;
 
     while (url2.size() > 0 && url2[0] == '#') {
       count++;
@@ -60,12 +60,12 @@ main(int argc, char **argv)
       url2 = url2.substr(1);
     }
 
-    int num = (int) pow(10, count);
+    int num = int(pow(10, count));
 
     for (int i = 0; i < num; i++) {
       string istr = CStrUtil::toString(i);
 
-      while ((int) istr.size() < count)
+      while (istr.size() < count)
         istr = "0" + istr;
 
       url = url1 + istr + url2;
