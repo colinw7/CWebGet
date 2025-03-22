@@ -16,7 +16,7 @@ class CWebGetLoadPageProc : public CThreadArrayProc {
    CThreadArrayProc(array), web_url_(web_url) {
   }
 
-  void *execute();
+  void *execute() override;
 
   bool getProcess() const { return web_url_->getProcess(); }
 
